@@ -49,6 +49,22 @@ class Spreadsheet {
       resolve(parsedData);
     });
   }
+  loadRaw () {
+    return new Promise(async (resolve, reject) => {
+      const rawData = await (await fetch(this.url)).text();
+      const parse = new Promise((res, rej) => {
+      const output = [];
+      csv.parseString(rawData, { headers: true })
+        .on('error', error => rej(error))
+        .on('data', row => output.push(row))
+        .on('end', rowCount => res(output));
+      });
+      const data = await parse;
+      const parsedData = data;
+      this.cache = parsedData;
+      resolve(parsedData);
+    });
+  }
   async uuids () {
     return (await this.load()).map(item => item._uuid);
   }
